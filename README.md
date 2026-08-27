@@ -1,6 +1,6 @@
 # Milan Relocation
 
-A private, native SwiftUI workspace for Henry and Jeff to coordinate their move to Milan. Tasks are editable and stored locally as JSON between launches; the other feature areas still use realistic local fixtures. There is no backend, authentication, analytics, notification delivery, or external dependency.
+A private, native SwiftUI workspace for Henry and Jeff to coordinate their move to Milan. Tasks, expenses, monthly targets, and relocation funds are editable and stored locally as JSON between launches; the remaining feature areas use realistic local fixtures. There is no backend, authentication, analytics, notification delivery, or external dependency.
 
 ## Requirements
 
