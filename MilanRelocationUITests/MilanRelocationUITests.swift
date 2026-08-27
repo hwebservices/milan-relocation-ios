@@ -79,6 +79,33 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertTrue(editedTask.waitForExistence(timeout: 3))
     }
 
+    func testTimelineNavigationShowsLiveGantt() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToTimeline(in: app)
+
+        XCTAssertTrue(app.descendants(matching: .any)["timeline-mode-picker"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["timeline-chart"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["timeline-move-milestone"].exists)
+    }
+
+    func testTimelineOpensTaskEditor() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToTimeline(in: app)
+
+        let taskBar = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Confirm temporary apartment")
+        ).firstMatch
+        XCTAssertTrue(taskBar.waitForExistence(timeout: 3))
+        taskBar.tap()
+
+        XCTAssertTrue(app.navigationBars["Edit Task"].waitForExistence(timeout: 2))
+        XCTAssertEqual(app.textFields["task-title"].value as? String, "Confirm temporary apartment in Porta Romana")
+    }
+
     private func makeApp() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchEnvironment["MILAN_UI_TESTING"] = "1"
@@ -93,6 +120,15 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 2))
         row.tap()
         XCTAssertTrue(app.navigationBars["Tasks"].waitForExistence(timeout: 2))
+    }
+
+    private func navigateToTimeline(in app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openSidebar(from: app.navigationBars["Today"])
+        let row = app.staticTexts["nav-timeline"]
+        XCTAssertTrue(row.waitForExistence(timeout: 2))
+        row.tap()
+        XCTAssertTrue(app.navigationBars["Timeline"].waitForExistence(timeout: 2))
     }
 
     private func openSidebar(from navigationBar: XCUIElement) {

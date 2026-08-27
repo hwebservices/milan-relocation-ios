@@ -3,21 +3,11 @@ import Observation
 
 @Observable
 final class MockRelocationStore {
-    var timeline: [TimelineItem]
     var budget: [BudgetItem]
     var documents: [DocumentItem]
     var contacts: [ContactItem]
 
-    init(calendar: Calendar = .current, now: Date = .now) {
-        func day(_ offset: Int) -> Date { calendar.date(byAdding: .day, value: offset, to: now) ?? now }
-
-        timeline = [
-            TimelineItem(title: "Documents & eligibility", category: "Preparation", owner: .both, startDate: day(-30), endDate: day(28), progress: 0.58),
-            TimelineItem(title: "Housing search", category: "Home", owner: .both, startDate: day(-8), endDate: day(65), progress: 0.24),
-            TimelineItem(title: "Work transition", category: "Career", owner: .henry, startDate: day(10), endDate: day(80), progress: 0.08),
-            TimelineItem(title: "Move & settle in", category: "Arrival", owner: .both, startDate: day(72), endDate: day(110), progress: 0)
-        ]
-
+    init() {
         budget = [
             BudgetItem(category: "Housing & deposits", planned: 16000, actual: 4200),
             BudgetItem(category: "Legal & documents", planned: 2500, actual: 860),

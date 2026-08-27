@@ -66,16 +66,6 @@ struct RelocationTask: Identifiable, Codable, Hashable {
     }
 }
 
-struct TimelineItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let category: String
-    let owner: TaskOwner
-    let startDate: Date
-    let endDate: Date
-    let progress: Double
-}
-
 struct BudgetItem: Identifiable {
     let id = UUID()
     let category: String
