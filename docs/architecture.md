@@ -12,12 +12,12 @@ The foundation favors clear feature ownership, SwiftUI composition, and an easy 
 - **Navigation** defines destinations and the adaptive app shell.
 - **Models** contains domain models with no UI dependencies beyond presentation labels.
 - **Features** contains one folder per primary app area. Each feature owns its screen and may later own view models and feature-specific components.
-- **Services** provides protocols and local implementations. `MockRelocationStore` is the only current data source.
+- **Services** provides protocols and local implementations. `TaskStore` owns editable task state and JSON persistence; `MockRelocationStore` supplies the remaining foundation fixtures.
 - **Resources** contains the asset catalog.
 
 ## State and data flow
 
-`MockRelocationStore` is created once by the app and injected through SwiftUI's environment. Feature views read its observable collections. This keeps mock data centralized and makes a future repository-backed store replaceable without restructuring navigation.
+`TaskStore` and `MockRelocationStore` are created once by the app and injected through SwiftUI's environment. Task mutations flow through `TaskStore`, which sorts and atomically saves the collection after each successful create, edit, or delete action. Persistence is isolated behind `TaskPersistence`, so tests use an in-memory implementation and a future shared repository can replace local JSON without restructuring feature views.
 
 ## Design system
 
@@ -25,5 +25,4 @@ The visual language uses warm ivory surfaces, ink text, deep Milan green as the 
 
 ## Future boundaries
 
-Authentication, synchronization, persistence, sharing, and production notifications are intentionally outside this milestone. They should be introduced behind service protocols after privacy, access, and hosting decisions are approved.
-
+Authentication, cross-device synchronization, sharing, and production notifications are intentionally outside this milestone. They should be introduced behind service protocols after privacy, access, and hosting decisions are approved.

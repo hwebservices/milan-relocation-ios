@@ -9,21 +9,53 @@ enum TaskOwner: String, Codable, CaseIterable, Identifiable {
     var initials: String { self == .both ? "H+J" : String(rawValue.prefix(1)) }
 }
 
+enum TaskPriority: String, Codable, CaseIterable, Identifiable {
+    case low = "Low"
+    case medium = "Medium"
+    case high = "High"
+    case urgent = "Urgent"
+
+    var id: Self { self }
+
+    var sortOrder: Int {
+        switch self {
+        case .low: 0
+        case .medium: 1
+        case .high: 2
+        case .urgent: 3
+        }
+    }
+}
+
 struct RelocationTask: Identifiable, Codable, Hashable {
     let id: UUID
     var title: String
     var category: String
     var owner: TaskOwner
     var status: TaskStatus
+    var priority: TaskPriority
+    var startDate: Date?
     var dueDate: Date
     var notes: String?
 
-    init(id: UUID = UUID(), title: String, category: String, owner: TaskOwner, status: TaskStatus, dueDate: Date, notes: String? = nil) {
+    init(
+        id: UUID = UUID(),
+        title: String,
+        category: String,
+        owner: TaskOwner,
+        status: TaskStatus,
+        priority: TaskPriority = .medium,
+        startDate: Date? = nil,
+        dueDate: Date,
+        notes: String? = nil
+    ) {
         self.id = id
         self.title = title
         self.category = category
         self.owner = owner
         self.status = status
+        self.priority = priority
+        self.startDate = startDate
         self.dueDate = dueDate
         self.notes = notes
     }
@@ -66,4 +98,3 @@ struct ContactItem: Identifiable {
     let organization: String
     let email: String
 }
-

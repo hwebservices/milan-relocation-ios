@@ -2,7 +2,11 @@
 
 ## RelocationTask
 
-The primary unit of work. A task has a title, category, owner, status, due date, optional notes, and a stable identifier. Overdue state is calculated rather than stored: a task is overdue when its due date is before the comparison date and its status is neither complete nor cancelled.
+The primary unit of work. A task has a title, category, owner, status, priority, optional start date, due date, optional notes, and a stable identifier. Overdue state is calculated rather than stored: a task is overdue when its due date is before the comparison date and its status is neither complete nor cancelled.
+
+## TaskPriority
+
+Priority is one of Low, Medium, High, or Urgent. It affects the task's visual emphasis and provides a stable sort tie-breaker; it does not change overdue calculations.
 
 ## TaskStatus
 
@@ -32,4 +36,3 @@ Represents an expense category with planned and actual amounts in euros. Totals 
 ## DocumentItem and ContactItem
 
 Lightweight models support the initial document and contact screens. They are local fixtures and contain no uploaded files or external identifiers.
-

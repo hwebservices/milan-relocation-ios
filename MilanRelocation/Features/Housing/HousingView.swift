@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HousingView: View {
-    @Environment(MockRelocationStore.self) private var store
+    @Environment(TaskStore.self) private var store
     private var tasks: [RelocationTask] { store.tasks.filter { $0.category == "Housing" } }
 
     var body: some View {

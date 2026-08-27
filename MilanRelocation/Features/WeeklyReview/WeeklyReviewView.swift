@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct WeeklyReviewView: View {
-    @Environment(MockRelocationStore.self) private var store
+    @Environment(TaskStore.self) private var store
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: MRSpacing.lg) {
