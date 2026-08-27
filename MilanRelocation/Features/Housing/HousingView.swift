@@ -8,7 +8,7 @@ struct HousingView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: MRSpacing.lg) {
                 PageHeader(eyebrow: "Home search", title: "Housing", detail: "Track neighborhoods, viewings, and lease decisions.")
-                HStack(spacing: MRSpacing.sm) {
+                MetricGrid(columns: 2) {
                     MetricBlock(label: "Shortlist", value: "4", detail: "properties")
                     MetricBlock(label: "Preferred", value: "Porta Romana", detail: "neighborhood", emphasized: true)
                 }
@@ -16,7 +16,6 @@ struct HousingView: View {
                 ForEach(tasks) { TaskRow(task: $0) }
                 ContentStateView(kind: .empty, title: "No viewings scheduled", detail: "Property appointments will appear here when added.")
             }.relocationPage()
-        }.navigationTitle("Housing")
+        }.navigationTitle("Housing").navigationBarTitleDisplayMode(.inline)
     }
 }
-

@@ -33,6 +33,7 @@ struct TasksView: View {
             .relocationPage()
         }
         .navigationTitle("Tasks")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func filterButton(_ title: String, status: TaskStatus?) -> some View {
@@ -42,6 +43,6 @@ struct TasksView: View {
             .padding(.horizontal, 12).padding(.vertical, 8)
             .foregroundStyle(selected ? Color.white : MRColor.ink)
             .background(selected ? MRColor.accent : MRColor.surface, in: Capsule())
+            .accessibilityValue(selected ? "Selected" : "Not selected")
     }
 }
-

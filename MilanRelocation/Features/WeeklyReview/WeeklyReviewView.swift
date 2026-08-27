@@ -11,7 +11,7 @@ struct WeeklyReviewView: View {
                 reviewPrompt(number: "02", title: "What is blocked?", detail: "Name the dependency and the next person to contact.")
                 reviewPrompt(number: "03", title: "What matters next week?", detail: "Choose no more than three shared priorities.")
             }.relocationPage()
-        }.navigationTitle("Weekly Review")
+        }.navigationTitle("Weekly Review").navigationBarTitleDisplayMode(.inline)
     }
 
     private func reviewPrompt(number: String, title: String, detail: String) -> some View {
@@ -22,4 +22,3 @@ struct WeeklyReviewView: View {
         }.padding(.vertical, 12)
     }
 }
-

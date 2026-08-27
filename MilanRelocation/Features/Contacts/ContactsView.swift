@@ -20,7 +20,6 @@ struct ContactsView: View {
                     Divider().overlay(MRColor.divider)
                 }
             }.relocationPage()
-        }.navigationTitle("Contacts")
+        }.navigationTitle("Contacts").navigationBarTitleDisplayMode(.inline)
     }
 }
-

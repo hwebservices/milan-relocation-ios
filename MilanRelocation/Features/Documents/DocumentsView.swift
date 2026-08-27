@@ -19,7 +19,6 @@ struct DocumentsView: View {
                     Divider().overlay(MRColor.divider)
                 }
             }.relocationPage()
-        }.navigationTitle("Documents")
+        }.navigationTitle("Documents").navigationBarTitleDisplayMode(.inline)
     }
 }
-

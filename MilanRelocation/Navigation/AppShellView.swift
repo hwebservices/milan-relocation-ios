@@ -8,6 +8,7 @@ struct AppShellView: View {
             List(AppDestination.allCases, selection: $selection) { destination in
                 Label(destination.title, systemImage: destination.icon)
                     .tag(destination)
+                    .accessibilityIdentifier("nav-\(destination.rawValue)")
             }
             .navigationTitle("Milan")
             .safeAreaInset(edge: .bottom) {
@@ -37,9 +38,9 @@ struct AppShellView: View {
                 case .settings: SettingsView()
                 }
             }
+            .accessibilityIdentifier("screen-\((selection ?? .today).rawValue)")
             .background(MRColor.background.ignoresSafeArea())
         }
         .navigationSplitViewStyle(.balanced)
     }
 }
-

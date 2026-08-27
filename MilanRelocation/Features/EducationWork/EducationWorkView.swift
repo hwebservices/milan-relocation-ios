@@ -16,7 +16,6 @@ struct EducationWorkView: View {
                     }
                 }.padding(MRSpacing.lg).background(MRColor.accentSoft, in: RoundedRectangle(cornerRadius: 18))
             }.relocationPage()
-        }.navigationTitle("Education & Work")
+        }.navigationTitle("Education & Work").navigationBarTitleDisplayMode(.inline)
     }
 }
-

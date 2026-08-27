@@ -10,12 +10,14 @@ struct TodayView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: MRSpacing.xl) {
                 PageHeader(eyebrow: Date.now.relocationLong, title: "Command Center", detail: "The next decisions for your move to Milan.")
+                    .accessibilityIdentifier("today-command-center")
 
-                HStack(spacing: MRSpacing.sm) {
+                MetricGrid(columns: 3) {
                     MetricBlock(label: "Active", value: "\(store.tasks.filter { !$0.status.isTerminal }.count)", detail: "open tasks", emphasized: true)
                     MetricBlock(label: "Overdue", value: "\(overdueCount)", detail: overdueCount == 1 ? "needs attention" : "need attention")
                     MetricBlock(label: "Target", value: "110", detail: "days to settled")
                 }
+                .accessibilityIdentifier("today-metrics")
 
                 VStack(alignment: .leading, spacing: 0) {
                     SectionLabel(title: "Up next", action: "Shared plan")
@@ -24,6 +26,7 @@ struct TodayView: View {
                         if task.id != activeTasks.last?.id { Divider().overlay(MRColor.divider) }
                     }
                 }
+                .accessibilityIdentifier("today-up-next")
 
                 VStack(alignment: .leading, spacing: MRSpacing.md) {
                     SectionLabel(title: "Current focus")
@@ -37,10 +40,11 @@ struct TodayView: View {
                     .padding(MRSpacing.lg)
                     .background(MRColor.accentSoft, in: RoundedRectangle(cornerRadius: 18))
                 }
+                .accessibilityIdentifier("today-current-focus")
             }
             .relocationPage()
         }
         .navigationTitle("Today")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
-

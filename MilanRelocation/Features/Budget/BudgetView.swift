@@ -11,7 +11,7 @@ struct BudgetView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: MRSpacing.lg) {
                 PageHeader(eyebrow: "Relocation fund", title: "Budget", detail: "Planned and committed costs in euros.")
-                HStack(spacing: MRSpacing.sm) {
+                MetricGrid(columns: 3) {
                     MetricBlock(label: "Plan", value: euro(planned), detail: "total envelope", emphasized: true)
                     MetricBlock(label: "Spent", value: euro(actual), detail: "recorded")
                     MetricBlock(label: "Remaining", value: euro(planned - actual), detail: "available")
@@ -32,6 +32,6 @@ struct BudgetView: View {
             .relocationPage()
         }
         .navigationTitle("Budget")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
-

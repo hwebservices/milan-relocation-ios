@@ -9,7 +9,7 @@ struct MilanRelocationApp: App {
             AppShellView()
                 .environment(store)
                 .tint(MRColor.accent)
+                .preferredColorScheme(.light)
         }
     }
 }
-

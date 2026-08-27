@@ -14,9 +14,11 @@ struct PageHeader: View {
             Text(title)
                 .font(.system(.largeTitle, design: .serif, weight: .semibold))
                 .foregroundStyle(MRColor.ink)
+                .fixedSize(horizontal: false, vertical: true)
             Text(detail)
                 .font(.subheadline)
                 .foregroundStyle(MRColor.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .combine)
     }
@@ -89,6 +91,13 @@ struct TaskRow: View {
             .foregroundStyle(MRColor.secondaryText)
         }
         .padding(.vertical, 12)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+    }
+
+    private var accessibilitySummary: String {
+        let overdue = task.isOverdue() ? ", overdue" : ""
+        return "\(task.title), \(task.status.title), owned by \(task.owner.rawValue), due \(task.dueDate.formatted(date: .long, time: .omitted))\(overdue)"
     }
 }
 
@@ -101,12 +110,39 @@ struct MetricBlock: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label.uppercased()).font(.caption2.weight(.bold)).tracking(1).foregroundStyle(emphasized ? .white.opacity(0.75) : MRColor.secondaryText)
-            Text(value).font(.system(.title2, design: .rounded, weight: .bold)).foregroundStyle(emphasized ? .white : MRColor.ink)
+            Text(value)
+                .font(.system(.title2, design: .rounded, weight: .bold))
+                .foregroundStyle(emphasized ? .white : MRColor.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.62)
             Text(detail).font(.caption).foregroundStyle(emphasized ? .white.opacity(0.75) : MRColor.secondaryText)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
         .padding(MRSpacing.md)
         .background(emphasized ? MRColor.accent : MRColor.surface, in: RoundedRectangle(cornerRadius: 16))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct MetricGrid<Content: View>: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let compactColumnCount: Int
+    @ViewBuilder let content: Content
+
+    init(columns: Int, @ViewBuilder content: () -> Content) {
+        compactColumnCount = columns
+        self.content = content()
+    }
+
+    var body: some View {
+        LazyVGrid(columns: gridColumns, spacing: MRSpacing.sm) {
+            content
+        }
+    }
+
+    private var gridColumns: [GridItem] {
+        let count = dynamicTypeSize.isAccessibilitySize ? 1 : compactColumnCount
+        return Array(repeating: GridItem(.flexible(), spacing: MRSpacing.sm), count: count)
     }
 }
 
@@ -133,4 +169,3 @@ struct ContentStateView: View {
         .background(MRColor.surface, in: RoundedRectangle(cornerRadius: 18))
     }
 }
-
