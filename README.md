@@ -1,6 +1,6 @@
 # Milan Relocation
 
-A private, native SwiftUI workspace for Henry and Jeff to coordinate their move to Milan. Tasks, expenses, budget targets, relocation funds, apartment listings, housing targets, contacts, and follow-ups are editable and stored locally between launches. Optional reminders use Apple's on-device local notifications; there is no backend, push provider, authentication, analytics, or external dependency.
+A private, native SwiftUI workspace for Henry and Jeff to coordinate their move to Milan. Tasks, expenses, budget targets, relocation funds, apartment listings, housing targets, documents, contacts, and follow-ups are editable and stored locally between launches. Optional reminders use Apple's on-device local notifications; there is no backend, push provider, authentication, analytics, or external dependency.
 
 ## Requirements
 
@@ -36,4 +36,4 @@ xcodebuild -project MilanRelocation.xcodeproj \
 
 ## Structure
 
-The app is organized by feature under `MilanRelocation/Features`, with shared models, navigation, services, resources, and design-system primitives kept in focused top-level folders. See [Architecture](docs/architecture.md), [Data model](docs/data-model.md), and [Local notifications](docs/notifications.md).
+The app is organized by feature under `MilanRelocation/Features`, with shared models, navigation, services, resources, and design-system primitives kept in focused top-level folders. See [Architecture](docs/architecture.md), [Data model](docs/data-model.md), [Document tracking](docs/documents.md), and [Local notifications](docs/notifications.md).

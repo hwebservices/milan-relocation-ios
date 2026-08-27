@@ -166,7 +166,7 @@ final class NotificationService {
     func rebuildScheduledNotifications(
         tasks: [RelocationTask],
         housingListings: [ApartmentListing],
-        documents: [DocumentItem],
+        documents: [RelocationDocument],
         now: Date = .now
     ) async {
         await refreshPermissionStatus()
@@ -186,7 +186,7 @@ final class NotificationService {
     func notificationRequests(
         tasks: [RelocationTask],
         housingListings: [ApartmentListing],
-        documents: [DocumentItem],
+        documents: [RelocationDocument],
         now: Date
     ) -> [LocalNotificationRequest] {
         var dated: [LocalNotificationRequest] = []
@@ -241,7 +241,9 @@ final class NotificationService {
 
         dated.sort { Self.fireDate(of: $0) < Self.fireDate(of: $1) }
         var requests = Array(dated.prefix(62))
-        let unresolvedCount = Self.unresolvedItemCount(tasks: tasks, housingListings: housingListings, documents: documents)
+        let unresolvedCount = Self.unresolvedItemCount(
+            tasks: tasks, housingListings: housingListings, documents: documents, now: now, calendar: calendar
+        )
         if preferences.isEnabled(.dailySummary), unresolvedCount > 0 {
             requests.append(LocalNotificationRequest(
                 id: "milan.summary.daily", title: "Milan relocation summary",
@@ -283,22 +285,30 @@ final class NotificationService {
     }
 
     static func isDocumentExpirationReminderEligible(
-        _ document: DocumentItem,
+        _ document: RelocationDocument,
         now: Date,
         calendar: Calendar
     ) -> Bool {
-        guard let expirationDate = document.expirationDate else { return false }
+        guard !document.isArchived,
+              document.status != .notApplicable,
+              document.status != .expired,
+              let expirationDate = document.expirationDate
+        else { return false }
         return expirationDate >= calendar.startOfDay(for: now)
     }
 
     static func unresolvedItemCount(
         tasks: [RelocationTask],
         housingListings: [ApartmentListing],
-        documents: [DocumentItem]
+        documents: [RelocationDocument],
+        now: Date = .now,
+        calendar: Calendar = .current
     ) -> Int {
         tasks.filter { !$0.status.isTerminal }.count
             + housingListings.filter { $0.qualification != .rejected }.count
-            + documents.filter { !$0.isReady }.count
+            + documents.filter {
+                !$0.isArchived && !$0.effectiveStatus(referenceDate: now, calendar: calendar).isResolved
+            }.count
     }
 
     static func nextDailyOccurrence(after now: Date, hour: Int, calendar: Calendar) -> Date {

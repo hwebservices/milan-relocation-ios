@@ -3,17 +3,9 @@ import Observation
 
 @Observable
 final class MockRelocationStore {
-    var documents: [DocumentItem]
     var contacts: [ContactItem]
 
     init() {
-        documents = [
-            DocumentItem(name: "Passports", category: "Identity", owner: .both, isReady: true, expirationDate: Calendar.current.date(from: DateComponents(year: 2028, month: 6, day: 18))),
-            DocumentItem(name: "Marriage certificate", category: "Civil records", owner: .henry, isReady: false),
-            DocumentItem(name: "Employment letters", category: "Work", owner: .both, isReady: true),
-            DocumentItem(name: "Health insurance evidence", category: "Health", owner: .jeff, isReady: false, expirationDate: Calendar.current.date(from: DateComponents(year: 2027, month: 2, day: 28)))
-        ]
-
         contacts = [
             ContactItem(name: "Giulia Bianchi", role: "Relocation consultant", organization: "Milano Welcome", email: "giulia@example.com"),
             ContactItem(name: "Luca Romano", role: "Property advisor", organization: "Casa Milano", email: "luca@example.com"),

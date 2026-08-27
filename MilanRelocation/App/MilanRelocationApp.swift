@@ -6,6 +6,7 @@ struct MilanRelocationApp: App {
     @State private var taskStore = TaskStore.live()
     @State private var budgetStore = BudgetStore.live()
     @State private var housingStore = HousingStore.live()
+    @State private var documentStore = DocumentStore.live()
     @State private var notificationService = NotificationService.live()
 
     var body: some Scene {
@@ -15,6 +16,7 @@ struct MilanRelocationApp: App {
                 .environment(taskStore)
                 .environment(budgetStore)
                 .environment(housingStore)
+                .environment(documentStore)
                 .environment(notificationService)
                 .tint(MRColor.accent)
                 .preferredColorScheme(.light)

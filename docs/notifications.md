@@ -30,8 +30,8 @@ Notification identifiers are deterministic and namespaced under `milan.*`. iOS l
 - Completed and cancelled tasks do not receive task notifications.
 - Past incomplete tasks receive an overdue reminder rather than a due-date reminder.
 - Rejected housing listings do not receive follow-up reminders.
-- Documents need a current or future expiration date.
-- The daily summary is scheduled only while unresolved tasks, active housing listings, or incomplete document items exist.
+- Documents must be applicable, unarchived, not explicitly expired, and have a current or future expiration date.
+- The daily summary is scheduled only while unresolved tasks, active housing listings, or unresolved active documents exist.
 
 ## Testing
 

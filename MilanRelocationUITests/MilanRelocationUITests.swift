@@ -206,6 +206,71 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertFalse(qualified.exists)
     }
 
+    func testCreatesDocument() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToDocuments(in: app)
+
+        app.buttons["documents-add-document"].tap()
+        XCTAssertTrue(app.navigationBars["New Document"].waitForExistence(timeout: 2))
+        let name = app.textFields["document-name"]
+        name.tap()
+        name.typeText("Italian tax code certificate")
+        app.buttons["document-save"].tap()
+
+        let created = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Italian tax code certificate")
+        ).firstMatch
+        XCTAssertTrue(created.waitForExistence(timeout: 3))
+    }
+
+    func testEditsDocument() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToDocuments(in: app)
+
+        let document = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Apostilled marriage certificate")
+        ).firstMatch
+        XCTAssertTrue(document.waitForExistence(timeout: 3))
+        document.tap()
+        XCTAssertTrue(app.navigationBars["Edit Document"].waitForExistence(timeout: 2))
+
+        let name = app.textFields["document-name"]
+        name.tap()
+        name.typeText(" — certified")
+        app.buttons["document-save"].tap()
+
+        let edited = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Apostilled marriage certificate — certified")
+        ).firstMatch
+        XCTAssertTrue(edited.waitForExistence(timeout: 3))
+    }
+
+    func testFiltersDocumentsByStatus() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToDocuments(in: app)
+
+        app.buttons["document-filter-button"].tap()
+        XCTAssertTrue(app.navigationBars["Document Filters"].waitForExistence(timeout: 2))
+        app.buttons["document-filter-status"].tap()
+        app.buttons["Requested"].tap()
+        app.buttons["document-apply-filters"].tap()
+
+        let requested = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Apostilled marriage certificate")
+        ).firstMatch
+        let complete = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Henry passport")
+        ).firstMatch
+        XCTAssertTrue(requested.waitForExistence(timeout: 3))
+        XCTAssertFalse(complete.exists)
+    }
+
     func testNotificationSettingsRequestsPermissionAndUpdatesPreferences() {
         continueAfterFailure = false
         let app = makeApp()
@@ -251,6 +316,7 @@ final class MilanRelocationUITests: XCTestCase {
         app.launchEnvironment["MILAN_RESET_TASKS"] = "1"
         app.launchEnvironment["MILAN_RESET_BUDGET"] = "1"
         app.launchEnvironment["MILAN_RESET_HOUSING"] = "1"
+        app.launchEnvironment["MILAN_RESET_DOCUMENTS"] = "1"
         app.launchEnvironment["MILAN_RESET_NOTIFICATIONS"] = "1"
         return app
     }
@@ -289,6 +355,15 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 2))
         row.tap()
         XCTAssertTrue(app.navigationBars["Housing"].waitForExistence(timeout: 2))
+    }
+
+    private func navigateToDocuments(in app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openSidebar(from: app.navigationBars["Today"])
+        let row = app.staticTexts["nav-documents"]
+        XCTAssertTrue(row.waitForExistence(timeout: 2))
+        row.tap()
+        XCTAssertTrue(app.navigationBars["Documents"].waitForExistence(timeout: 2))
     }
 
     private func navigateToSettings(in app: XCUIApplication) {
