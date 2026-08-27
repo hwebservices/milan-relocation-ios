@@ -1,6 +1,10 @@
 import SwiftUI
 
 struct AppShellView: View {
+    @Environment(TaskStore.self) private var taskStore
+    @Environment(HousingStore.self) private var housingStore
+    @Environment(MockRelocationStore.self) private var workspaceStore
+    @Environment(NotificationService.self) private var notificationService
     @State private var selection: AppDestination? = .today
 
     var body: some View {
@@ -42,5 +46,28 @@ struct AppShellView: View {
             .background(MRColor.background.ignoresSafeArea())
         }
         .navigationSplitViewStyle(.balanced)
+        .task(id: notificationScheduleSignature) {
+            await notificationService.rebuildScheduledNotifications(
+                tasks: taskStore.tasks,
+                housingListings: housingStore.listings,
+                documents: workspaceStore.documents
+            )
+        }
+    }
+
+    private var notificationScheduleSignature: String {
+        let tasks = taskStore.tasks.map {
+            "\($0.id.uuidString)|\($0.status.rawValue)|\($0.dueDate.timeIntervalSince1970)"
+        }.joined(separator: ";")
+        let housing = housingStore.listings.map {
+            "\($0.id.uuidString)|\($0.qualification.rawValue)|\($0.nextFollowUpDate?.timeIntervalSince1970 ?? -1)"
+        }.joined(separator: ";")
+        let documents = workspaceStore.documents.map {
+            "\($0.id.uuidString)|\($0.isReady)|\($0.expirationDate?.timeIntervalSince1970 ?? -1)"
+        }.joined(separator: ";")
+        return [
+            tasks, housing, documents, notificationService.preferences.scheduleSignature,
+            notificationService.permissionStatus.rawValue
+        ].joined(separator: "#")
     }
 }

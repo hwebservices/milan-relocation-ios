@@ -8,10 +8,10 @@ final class MockRelocationStore {
 
     init() {
         documents = [
-            DocumentItem(name: "Passports", category: "Identity", owner: .both, isReady: true),
+            DocumentItem(name: "Passports", category: "Identity", owner: .both, isReady: true, expirationDate: Calendar.current.date(from: DateComponents(year: 2028, month: 6, day: 18))),
             DocumentItem(name: "Marriage certificate", category: "Civil records", owner: .henry, isReady: false),
             DocumentItem(name: "Employment letters", category: "Work", owner: .both, isReady: true),
-            DocumentItem(name: "Health insurance evidence", category: "Health", owner: .jeff, isReady: false)
+            DocumentItem(name: "Health insurance evidence", category: "Health", owner: .jeff, isReady: false, expirationDate: Calendar.current.date(from: DateComponents(year: 2027, month: 2, day: 28)))
         ]
 
         contacts = [

@@ -12,6 +12,11 @@ struct DocumentsView: View {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(document.name).font(.body.weight(.semibold))
                             Text(document.category).font(.caption).foregroundStyle(MRColor.secondaryText)
+                            if let expirationDate = document.expirationDate {
+                                Text("Expires \(expirationDate.relocationShort)")
+                                    .font(.caption2)
+                                    .foregroundStyle(MRColor.secondaryText)
+                            }
                         }
                         Spacer()
                         OwnerLabel(owner: document.owner)

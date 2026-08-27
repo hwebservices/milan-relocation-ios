@@ -46,3 +46,7 @@ Lightweight models support the initial document and contact screens. They are lo
 `MilanHousingTargets` stores editable monthly and move-in ceilings plus minimum bedrooms, minimum square meters, elevator requirement, and optional furnishing preference. A listing's budget and requirements results are calculated against these targets; its explicit pipeline qualification remains a separate decision flag.
 
 `HousingContactAttempt` preserves outreach method, date, and optional response. `HousingPriceChange` is appended automatically whenever rent changes. Follow-up overdue state is calculated from the next follow-up date and excludes rejected listings.
+
+## Notification preferences
+
+`NotificationPreferences` stores the enabled reminder-category set and the selected `ReminderTiming`. Permission state and scheduled requests are read from iOS and are not treated as durable domain data. `LocalNotificationRequest` is an internal, testable representation that `NotificationService` translates into system requests.

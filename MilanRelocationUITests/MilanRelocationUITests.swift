@@ -206,12 +206,52 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertFalse(qualified.exists)
     }
 
+    func testNotificationSettingsRequestsPermissionAndUpdatesPreferences() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToSettings(in: app)
+
+        app.buttons["settings-notifications"].tap()
+        XCTAssertTrue(app.navigationBars["Notifications"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.descendants(matching: .any)["notification-permission-status"].exists)
+        app.buttons["notification-request-permission"].tap()
+
+        let allowed = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == %@ AND label CONTAINS %@", "notification-permission-status", "Allowed")
+        ).firstMatch
+        XCTAssertTrue(allowed.waitForExistence(timeout: 3))
+
+        app.buttons["notification-reminder-timing"].tap()
+        app.buttons["3 days before"].tap()
+        app.swipeUp()
+        let housingToggle = app.switches["notification-category-housingFollowUps"]
+        XCTAssertTrue(housingToggle.exists)
+        housingToggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        let disabled = expectation(for: NSPredicate(format: "value == %@", "0"), evaluatedWith: housingToggle)
+        wait(for: [disabled], timeout: 2)
+    }
+
+    func testNotificationSettingsHandlesDeniedPermission() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launchEnvironment["MILAN_NOTIFICATION_TEST_STATUS"] = "denied"
+        app.launch()
+        navigateToSettings(in: app)
+
+        app.buttons["settings-notifications"].tap()
+        XCTAssertTrue(app.navigationBars["Notifications"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["notification-open-system-settings"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["notification-request-permission"].exists)
+    }
+
     private func makeApp() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchEnvironment["MILAN_UI_TESTING"] = "1"
         app.launchEnvironment["MILAN_RESET_TASKS"] = "1"
         app.launchEnvironment["MILAN_RESET_BUDGET"] = "1"
         app.launchEnvironment["MILAN_RESET_HOUSING"] = "1"
+        app.launchEnvironment["MILAN_RESET_NOTIFICATIONS"] = "1"
         return app
     }
 
@@ -249,6 +289,15 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 2))
         row.tap()
         XCTAssertTrue(app.navigationBars["Housing"].waitForExistence(timeout: 2))
+    }
+
+    private func navigateToSettings(in app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openSidebar(from: app.navigationBars["Today"])
+        let row = app.staticTexts["nav-settings"]
+        XCTAssertTrue(row.waitForExistence(timeout: 2))
+        row.tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 2))
     }
 
     private func openSidebar(from navigationBar: XCUIElement) {
