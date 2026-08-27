@@ -147,11 +147,71 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertTrue(edited.waitForExistence(timeout: 3))
     }
 
+    func testCreatesHousingListing() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToHousing(in: app)
+
+        app.buttons["housing-add-listing"].tap()
+        XCTAssertTrue(app.navigationBars["New Listing"].waitForExistence(timeout: 2))
+        app.textFields["housing-address"].tap()
+        app.textFields["housing-address"].typeText("Via Torino 77")
+        app.textFields["housing-neighborhood"].tap()
+        app.textFields["housing-neighborhood"].typeText("Centro")
+        let rent = app.textFields["housing-rent"]
+        XCTAssertTrue(rent.waitForExistence(timeout: 2))
+        rent.tap()
+        rent.typeText("2100")
+        app.buttons["housing-save-listing"].tap()
+
+        let created = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Via Torino 77")).firstMatch
+        XCTAssertTrue(created.waitForExistence(timeout: 3))
+    }
+
+    func testEditsHousingListing() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToHousing(in: app)
+
+        let listing = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Via Orti 12")).firstMatch
+        XCTAssertTrue(listing.waitForExistence(timeout: 3))
+        listing.tap()
+        XCTAssertTrue(app.navigationBars["Edit Listing"].waitForExistence(timeout: 2))
+        let address = app.textFields["housing-address"]
+        address.tap()
+        address.typeText(" Apt A")
+        app.buttons["housing-save-listing"].tap()
+
+        let edited = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Via Orti 12 Apt A")).firstMatch
+        XCTAssertTrue(edited.waitForExistence(timeout: 3))
+    }
+
+    func testFiltersHousingListingsByStatus() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToHousing(in: app)
+
+        app.buttons["housing-filter-button"].tap()
+        XCTAssertTrue(app.navigationBars["Sort & Filter"].waitForExistence(timeout: 2))
+        app.buttons["housing-filter-status"].tap()
+        app.buttons["Over budget"].tap()
+        app.buttons["housing-apply-filters"].tap()
+
+        let overBudget = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Via Savona 31")).firstMatch
+        let qualified = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Via Orti 12")).firstMatch
+        XCTAssertTrue(overBudget.waitForExistence(timeout: 3))
+        XCTAssertFalse(qualified.exists)
+    }
+
     private func makeApp() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchEnvironment["MILAN_UI_TESTING"] = "1"
         app.launchEnvironment["MILAN_RESET_TASKS"] = "1"
         app.launchEnvironment["MILAN_RESET_BUDGET"] = "1"
+        app.launchEnvironment["MILAN_RESET_HOUSING"] = "1"
         return app
     }
 
@@ -180,6 +240,15 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 2))
         row.tap()
         XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 2))
+    }
+
+    private func navigateToHousing(in app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openSidebar(from: app.navigationBars["Today"])
+        let row = app.staticTexts["nav-housing"]
+        XCTAssertTrue(row.waitForExistence(timeout: 2))
+        row.tap()
+        XCTAssertTrue(app.navigationBars["Housing"].waitForExistence(timeout: 2))
     }
 
     private func openSidebar(from navigationBar: XCUIElement) {

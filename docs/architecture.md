@@ -12,14 +12,16 @@ The foundation favors clear feature ownership, SwiftUI composition, and an easy 
 - **Navigation** defines destinations and the adaptive app shell.
 - **Models** contains domain models with no UI dependencies beyond presentation labels.
 - **Features** contains one folder per primary app area. Each feature owns its screen and may later own view models and feature-specific components.
-- **Services** provides protocols and local implementations. `TaskStore` and `BudgetStore` own editable state and JSON persistence; `MockRelocationStore` supplies the remaining foundation fixtures.
+- **Services** provides protocols and local implementations. `TaskStore`, `BudgetStore`, and `HousingStore` own editable state and JSON persistence; `MockRelocationStore` supplies the remaining foundation fixtures.
 - **Resources** contains the asset catalog.
 
 ## State and data flow
 
-`TaskStore`, `BudgetStore`, and `MockRelocationStore` are created once by the app and injected through SwiftUI's environment. Mutations flow through their owning store and atomically save after create, edit, or delete actions. Persistence is isolated behind store-specific protocols, so tests use in-memory implementations and a future shared repository can replace local JSON without restructuring feature views.
+`TaskStore`, `BudgetStore`, `HousingStore`, and `MockRelocationStore` are created once by the app and injected through SwiftUI's environment. Mutations flow through their owning store and atomically save after create, edit, or delete actions. Persistence is isolated behind store-specific protocols, so tests use in-memory implementations and a future shared repository can replace local JSON without restructuring feature views.
 
 `BudgetStore` treats one-time expenses as belonging to their recorded month and monthly expenses as active from their recorded month forward. Monthly summaries, category actuals, remaining budget, and variance are derived rather than persisted.
+
+`HousingStore` persists the apartment shortlist and editable Milan targets. Monthly cost, move-in cash, target qualification, and overdue follow-ups are derived. Rent edits append immutable price-change entries, preserving the listing's local history without duplicating current price state.
 
 The timeline is a projection of `TaskStore` rather than a separate data source. `GanttTimelineLayout` owns date-range, duration, zoom-scale, milestone, and positioning calculations independently from SwiftUI, keeping the chart deterministic and unit-testable.
 
