@@ -27,9 +27,13 @@ Terminal statuses are `complete` and `cancelled`.
 
 Ownership is intentionally small and explicit: Henry, Jeff, or Both. A later shared system can replace this enum with user identifiers while preserving the UI-facing ownership concept.
 
-## BudgetItem
+## Expense and budget
 
-Represents an expense category with planned and actual amounts in euros. Totals and remaining budget are derived.
+`Expense` records a description, euro amount, date, category, owner, recurrence, optional notes, and local receipt placeholders. Recurrence is either one-time or monthly. Monthly expenses contribute once per month beginning with their recorded month.
+
+`MonthlyBudgetTarget` stores the editable plan for one of the thirteen supported expense categories. `MonthlyBudgetSummary` derives planned spending, actual spending, remaining budget, variance, and the over-budget state for a selected month.
+
+`RelocationFunding` separately tracks relocation cash, deposits, and the emergency reserve. `ReceiptAttachment` stores local placeholder metadata only; no file upload or external identifier is used.
 
 ## DocumentItem and ContactItem
 

@@ -106,10 +106,52 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertEqual(app.textFields["task-title"].value as? String, "Confirm temporary apartment in Porta Romana")
     }
 
+    func testAddsExpense() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToBudget(in: app)
+
+        app.buttons["budget-add-expense"].tap()
+        XCTAssertTrue(app.navigationBars["New Expense"].waitForExistence(timeout: 2))
+        app.textFields["expense-name"].tap()
+        app.textFields["expense-name"].typeText("Visa translation fee")
+        app.textFields["expense-amount"].tap()
+        app.textFields["expense-amount"].typeText("125.50")
+        app.buttons["expense-save"].tap()
+
+        let created = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Visa translation fee")
+        ).firstMatch
+        XCTAssertTrue(created.waitForExistence(timeout: 3))
+    }
+
+    func testEditsExpenseRecurrence() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToBudget(in: app)
+
+        let expense = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Groceries — Esselunga")
+        ).firstMatch
+        XCTAssertTrue(expense.waitForExistence(timeout: 3))
+        expense.tap()
+        XCTAssertTrue(app.navigationBars["Edit Expense"].waitForExistence(timeout: 2))
+        app.segmentedControls.buttons["Monthly"].tap()
+        app.buttons["expense-save"].tap()
+
+        let edited = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@ AND label CONTAINS %@", "Groceries — Esselunga", "Monthly")
+        ).firstMatch
+        XCTAssertTrue(edited.waitForExistence(timeout: 3))
+    }
+
     private func makeApp() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchEnvironment["MILAN_UI_TESTING"] = "1"
         app.launchEnvironment["MILAN_RESET_TASKS"] = "1"
+        app.launchEnvironment["MILAN_RESET_BUDGET"] = "1"
         return app
     }
 
@@ -129,6 +171,15 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 2))
         row.tap()
         XCTAssertTrue(app.navigationBars["Timeline"].waitForExistence(timeout: 2))
+    }
+
+    private func navigateToBudget(in app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openSidebar(from: app.navigationBars["Today"])
+        let row = app.staticTexts["nav-budget"]
+        XCTAssertTrue(row.waitForExistence(timeout: 2))
+        row.tap()
+        XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 2))
     }
 
     private func openSidebar(from navigationBar: XCUIElement) {

@@ -66,13 +66,6 @@ struct RelocationTask: Identifiable, Codable, Hashable {
     }
 }
 
-struct BudgetItem: Identifiable {
-    let id = UUID()
-    let category: String
-    let planned: Decimal
-    let actual: Decimal
-}
-
 struct DocumentItem: Identifiable {
     let id = UUID()
     let name: String
