@@ -19,6 +19,8 @@ The foundation favors clear feature ownership, SwiftUI composition, and an easy 
 
 `TaskStore` and `MockRelocationStore` are created once by the app and injected through SwiftUI's environment. Task mutations flow through `TaskStore`, which sorts and atomically saves the collection after each successful create, edit, or delete action. Persistence is isolated behind `TaskPersistence`, so tests use an in-memory implementation and a future shared repository can replace local JSON without restructuring feature views.
 
+The timeline is a projection of `TaskStore` rather than a separate data source. `GanttTimelineLayout` owns date-range, duration, zoom-scale, milestone, and positioning calculations independently from SwiftUI, keeping the chart deterministic and unit-testable.
+
 ## Design system
 
 The visual language uses warm ivory surfaces, ink text, deep Milan green as the single action accent, fine dividers, generous spacing, and restrained card use. Status colors communicate meaning but do not compete with primary navigation.
