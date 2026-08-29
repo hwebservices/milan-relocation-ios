@@ -36,4 +36,4 @@ xcodebuild -project MilanRelocation.xcodeproj \
 
 ## Structure
 
-The app is organized by feature under `MilanRelocation/Features`, with shared models, navigation, services, resources, and design-system primitives kept in focused top-level folders. See [Architecture](docs/architecture.md), [Data model](docs/data-model.md), [Document tracking](docs/documents.md), and [Local notifications](docs/notifications.md).
+The app is organized by feature under `MilanRelocation/Features`, with shared models, navigation, services, resources, and design-system primitives kept in focused top-level folders. See [Architecture](docs/architecture.md), [Data model](docs/data-model.md), [Document tracking](docs/documents.md), [Local notifications](docs/notifications.md), and [TestFlight preparation](docs/testflight.md).
