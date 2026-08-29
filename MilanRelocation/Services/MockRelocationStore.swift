@@ -3,7 +3,6 @@ import Observation
 
 @Observable
 final class MockRelocationStore {
-    var tasks: [RelocationTask]
     var timeline: [TimelineItem]
     var budget: [BudgetItem]
     var documents: [DocumentItem]
@@ -11,16 +10,6 @@ final class MockRelocationStore {
 
     init(calendar: Calendar = .current, now: Date = .now) {
         func day(_ offset: Int) -> Date { calendar.date(byAdding: .day, value: offset, to: now) ?? now }
-
-        tasks = [
-            RelocationTask(title: "Confirm temporary apartment in Porta Romana", category: "Housing", owner: .both, status: .inProgress, dueDate: day(2), notes: "Compare cancellation terms before signing."),
-            RelocationTask(title: "Request apostilled marriage certificate", category: "Documents", owner: .henry, status: .waitingForResponse, dueDate: day(-3)),
-            RelocationTask(title: "Submit codice fiscale applications", category: "Documents", owner: .both, status: .notStarted, dueDate: day(7)),
-            RelocationTask(title: "Shortlist Italian language programs", category: "Education & Work", owner: .jeff, status: .inProgress, dueDate: day(5)),
-            RelocationTask(title: "Review international health coverage", category: "Admin", owner: .henry, status: .blocked, dueDate: day(1)),
-            RelocationTask(title: "Create first-month arrival budget", category: "Budget", owner: .jeff, status: .complete, dueDate: day(-2)),
-            RelocationTask(title: "Book exploratory housing trip", category: "Travel", owner: .both, status: .cancelled, dueDate: day(14))
-        ]
 
         timeline = [
             TimelineItem(title: "Documents & eligibility", category: "Preparation", owner: .both, startDate: day(-30), endDate: day(28), progress: 0.58),
@@ -51,4 +40,3 @@ final class MockRelocationStore {
         ]
     }
 }
-

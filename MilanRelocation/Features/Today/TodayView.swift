@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TodayView: View {
-    @Environment(MockRelocationStore.self) private var store
+    @Environment(TaskStore.self) private var store
 
     private var activeTasks: [RelocationTask] { store.tasks.filter { !$0.status.isTerminal }.prefix(4).map { $0 } }
     private var overdueCount: Int { store.tasks.filter { $0.isOverdue() }.count }

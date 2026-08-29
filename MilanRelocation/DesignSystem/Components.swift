@@ -65,6 +65,26 @@ struct OwnerLabel: View {
     }
 }
 
+extension TaskPriority {
+    var color: Color {
+        switch self {
+        case .low: MRColor.secondaryText
+        case .medium: MRColor.accent
+        case .high: MRColor.amber
+        case .urgent: MRColor.red
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .low: "flag"
+        case .medium: "flag"
+        case .high: "flag.fill"
+        case .urgent: "exclamationmark.triangle.fill"
+        }
+    }
+}
+
 struct TaskRow: View {
     let task: RelocationTask
 
@@ -75,7 +95,13 @@ struct TaskRow: View {
                 .foregroundStyle(task.status.color)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 7) {
-                Text(task.title).font(.body.weight(.semibold)).foregroundStyle(MRColor.ink)
+                HStack(alignment: .firstTextBaseline, spacing: 7) {
+                    Image(systemName: task.priority.symbol)
+                        .font(.caption)
+                        .foregroundStyle(task.priority.color)
+                        .accessibilityHidden(true)
+                    Text(task.title).font(.body.weight(.semibold)).foregroundStyle(MRColor.ink)
+                }
                 HStack(spacing: 8) {
                     StatusPill(status: task.status)
                     OwnerLabel(owner: task.owner)
@@ -97,7 +123,7 @@ struct TaskRow: View {
 
     private var accessibilitySummary: String {
         let overdue = task.isOverdue() ? ", overdue" : ""
-        return "\(task.title), \(task.status.title), owned by \(task.owner.rawValue), due \(task.dueDate.formatted(date: .long, time: .omitted))\(overdue)"
+        return "\(task.title), \(task.priority.rawValue) priority, \(task.status.title), owned by \(task.owner.rawValue), due \(task.dueDate.formatted(date: .long, time: .omitted))\(overdue)"
     }
 }
 

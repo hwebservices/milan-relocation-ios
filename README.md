@@ -1,6 +1,6 @@
 # Milan Relocation
 
-A private, native SwiftUI workspace for Henry and Jeff to coordinate their move to Milan. This foundation uses local mock data only: there is no backend, authentication, analytics, notification delivery, or external dependency.
+A private, native SwiftUI workspace for Henry and Jeff to coordinate their move to Milan. Tasks are editable and stored locally as JSON between launches; the other feature areas still use realistic local fixtures. There is no backend, authentication, analytics, notification delivery, or external dependency.
 
 ## Requirements
 
@@ -37,4 +37,3 @@ xcodebuild -project MilanRelocation.xcodeproj \
 ## Structure
 
 The app is organized by feature under `MilanRelocation/Features`, with shared models, navigation, services, resources, and design-system primitives kept in focused top-level folders. See [Architecture](docs/architecture.md) and [Data model](docs/data-model.md).
-

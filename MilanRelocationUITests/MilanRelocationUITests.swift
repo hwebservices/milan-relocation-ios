@@ -4,7 +4,7 @@ import XCTest
 final class MilanRelocationUITests: XCTestCase {
     func testTodayIsDefaultAndShowsCommandCenterContent() {
         continueAfterFailure = false
-        let app = XCUIApplication()
+        let app = makeApp()
         app.launch()
 
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
@@ -18,7 +18,7 @@ final class MilanRelocationUITests: XCTestCase {
 
     func testMainNavigationReachesEveryScreen() {
         continueAfterFailure = false
-        let app = XCUIApplication()
+        let app = makeApp()
         app.launch()
 
         let destinations: [(id: String, title: String)] = [
@@ -41,6 +41,58 @@ final class MilanRelocationUITests: XCTestCase {
             row.tap()
             XCTAssertTrue(app.navigationBars[destination.title].waitForExistence(timeout: 2), "Did not navigate to \(destination.title)")
         }
+    }
+
+    func testCreatesTask() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToTasks(in: app)
+
+        app.buttons["tasks-add-task"].tap()
+        XCTAssertTrue(app.navigationBars["New Task"].waitForExistence(timeout: 2))
+        let titleField = app.textFields["task-title"]
+        titleField.tap()
+        titleField.typeText("Arrange pet travel")
+        app.buttons["task-save"].tap()
+
+        let createdTask = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Arrange pet travel")).firstMatch
+        XCTAssertTrue(createdTask.waitForExistence(timeout: 3))
+    }
+
+    func testEditsTaskStatus() {
+        continueAfterFailure = false
+        let app = makeApp()
+        app.launch()
+        navigateToTasks(in: app)
+
+        let task = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Confirm temporary apartment")).firstMatch
+        XCTAssertTrue(task.waitForExistence(timeout: 3))
+        task.tap()
+        XCTAssertTrue(app.navigationBars["Edit Task"].waitForExistence(timeout: 2))
+
+        app.descendants(matching: .any)["task-status"].tap()
+        app.collectionViews.buttons["Complete"].firstMatch.tap()
+        app.buttons["task-save"].tap()
+
+        let editedTask = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ AND label CONTAINS %@", "Confirm temporary apartment", "Complete")).firstMatch
+        XCTAssertTrue(editedTask.waitForExistence(timeout: 3))
+    }
+
+    private func makeApp() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchEnvironment["MILAN_UI_TESTING"] = "1"
+        app.launchEnvironment["MILAN_RESET_TASKS"] = "1"
+        return app
+    }
+
+    private func navigateToTasks(in app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openSidebar(from: app.navigationBars["Today"])
+        let row = app.staticTexts["nav-tasks"]
+        XCTAssertTrue(row.waitForExistence(timeout: 2))
+        row.tap()
+        XCTAssertTrue(app.navigationBars["Tasks"].waitForExistence(timeout: 2))
     }
 
     private func openSidebar(from navigationBar: XCUIElement) {
