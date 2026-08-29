@@ -46,12 +46,14 @@ struct ReceiptAttachment: Identifiable, Codable, Hashable {
     let id: UUID
     var displayName: String
     var localIdentifier: String
+    var localRelativePath: String?
     var addedAt: Date
 
-    init(id: UUID = UUID(), displayName: String, localIdentifier: String = UUID().uuidString, addedAt: Date = .now) {
+    init(id: UUID = UUID(), displayName: String, localIdentifier: String = UUID().uuidString, localRelativePath: String? = nil, addedAt: Date = .now) {
         self.id = id
         self.displayName = displayName
         self.localIdentifier = localIdentifier
+        self.localRelativePath = localRelativePath
         self.addedAt = addedAt
     }
 }

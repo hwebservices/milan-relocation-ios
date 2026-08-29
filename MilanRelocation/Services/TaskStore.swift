@@ -63,7 +63,8 @@ final class TaskStore {
         if environment["MILAN_RESET_TASKS"] == "1" {
             try? FileManager.default.removeItem(at: persistence.url)
         }
-        return TaskStore(persistence: persistence, seedTasks: sampleTasks(calendar: calendar, now: now))
+        let seed = environment["MILAN_UI_TESTING"] == "1" ? sampleTasks(calendar: calendar, now: now) : []
+        return TaskStore(persistence: persistence, seedTasks: seed)
     }
 
     func create(_ task: RelocationTask) {
@@ -81,6 +82,8 @@ final class TaskStore {
         tasks.removeAll { $0.id == id }
         commit()
     }
+
+    func replaceAll(with tasks: [RelocationTask]) { self.tasks = tasks; commit() }
 
     func filtered(status: TaskStatus?, owner: TaskOwner?) -> [RelocationTask] {
         tasks.filter { task in

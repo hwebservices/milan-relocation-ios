@@ -1,4 +1,6 @@
 import SwiftUI
+import UniformTypeIdentifiers
+import QuickLook
 
 struct ExpenseEditorView: View {
     @Environment(BudgetStore.self) private var budgetStore
@@ -15,6 +17,12 @@ struct ExpenseEditorView: View {
     @State private var notes: String
     @State private var receipts: [ReceiptAttachment]
     @State private var showsDeleteConfirmation = false
+    @State private var showsFileImporter = false
+    @State private var previewURL: URL?
+    @State private var importError: String?
+    @State private var newlyImportedPaths: Set<String> = []
+    @State private var pathsToRemoveOnSave: Set<String> = []
+    private let attachmentService = LocalAttachmentService()
 
     init(expense: Expense?) {
         originalExpense = expense
@@ -69,9 +77,12 @@ struct ExpenseEditorView: View {
                 Section {
                     ForEach(receipts) { receipt in
                         HStack {
-                            Label(receipt.displayName, systemImage: "doc.text")
+                            Button { previewURL = attachmentService.url(for: receipt.localRelativePath) } label: {
+                                Label(receipt.displayName, systemImage: "doc.text")
+                            }.buttonStyle(.plain).disabled(attachmentService.url(for: receipt.localRelativePath) == nil)
                             Spacer()
                             Button(role: .destructive) {
+                                stageRemoval(of: receipt.localRelativePath)
                                 receipts.removeAll { $0.id == receipt.id }
                             } label: {
                                 Image(systemName: "trash")
@@ -80,17 +91,15 @@ struct ExpenseEditorView: View {
                         }
                     }
                     Button {
-                        receipts.append(
-                            ReceiptAttachment(displayName: "Receipt \(receipts.count + 1).pdf")
-                        )
+                        showsFileImporter = true
                     } label: {
-                        Label("Add receipt placeholder", systemImage: "paperclip")
+                        Label("Import receipt", systemImage: "paperclip")
                     }
                     .accessibilityIdentifier("expense-add-receipt")
                 } header: {
                     Text("Receipts")
                 } footer: {
-                    Text("Receipt placeholders remain on this device. File import will be added later.")
+                    Text("Receipt files are copied into this app’s private local storage and are never uploaded.")
                 }
 
                 if originalExpense != nil {
@@ -109,7 +118,7 @@ struct ExpenseEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") { cancel() }
                         .accessibilityIdentifier("expense-cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -125,6 +134,11 @@ struct ExpenseEditorView: View {
             } message: {
                 Text("This removes “\(name)” from the local budget. This action cannot be undone.")
             }
+            .fileImporter(isPresented: $showsFileImporter, allowedContentTypes: [.data], allowsMultipleSelection: true) { result in
+                importReceipts(result)
+            }
+            .quickLookPreview($previewURL)
+            .alert("Receipt import failed", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) { Button("OK") { importError = nil } } message: { Text(importError ?? "The selected file could not be copied.") }
         }
         .preferredColorScheme(.light)
     }
@@ -154,12 +168,38 @@ struct ExpenseEditorView: View {
         )
         if originalExpense == nil { budgetStore.create(expense) }
         else { budgetStore.update(expense) }
+        pathsToRemoveOnSave.forEach { attachmentService.remove(relativePath: $0) }
         dismiss()
     }
 
     private func deleteExpense() {
         guard let originalExpense else { return }
+        originalExpense.receipts.forEach { attachmentService.remove(relativePath: $0.localRelativePath) }
         budgetStore.delete(id: originalExpense.id)
         dismiss()
+    }
+
+    private func cancel() {
+        newlyImportedPaths.forEach { attachmentService.remove(relativePath: $0) }
+        dismiss()
+    }
+
+    private func stageRemoval(of relativePath: String?) {
+        guard let relativePath else { return }
+        if newlyImportedPaths.remove(relativePath) != nil {
+            attachmentService.remove(relativePath: relativePath)
+        } else {
+            pathsToRemoveOnSave.insert(relativePath)
+        }
+    }
+
+    private func importReceipts(_ result: Result<[URL], Error>) {
+        do {
+            for source in try result.get() {
+                let imported = try attachmentService.importFile(from: source)
+                receipts.append(ReceiptAttachment(displayName: source.lastPathComponent, localRelativePath: imported.relativePath))
+                newlyImportedPaths.insert(imported.relativePath)
+            }
+        } catch { importError = error.localizedDescription }
     }
 }

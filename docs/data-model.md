@@ -29,19 +29,23 @@ Ownership is intentionally small and explicit: Henry, Jeff, or Both. A later sha
 
 ## Expense and budget
 
-`Expense` records a description, euro amount, date, category, owner, recurrence, optional notes, and local receipt placeholders. Recurrence is either one-time or monthly. Monthly expenses contribute once per month beginning with their recorded month.
+`Expense` records a description, euro amount, date, category, owner, recurrence, optional notes, and local receipt attachments. Recurrence is either one-time or monthly. Monthly expenses contribute once per month beginning with their recorded month.
 
 `MonthlyBudgetTarget` stores the editable plan for one of the thirteen supported expense categories. `MonthlyBudgetSummary` derives planned spending, actual spending, remaining budget, variance, and the over-budget state for a selected month.
 
-`RelocationFunding` separately tracks relocation cash, deposits, and the emergency reserve. `ReceiptAttachment` stores local placeholder metadata only; no file upload or external identifier is used.
+`RelocationFunding` separately tracks relocation cash, deposits, and the emergency reserve. `ReceiptAttachment` stores the display metadata and private relative path for a receipt copied into the app container. No file upload or external identifier is used.
 
 ## RelocationDocument
 
 `RelocationDocument` records a name, Henry/Jeff/Both ownership, a typed category and workflow status, optional issue and expiration dates, the requiring application or process, notes, source information, local attachment metadata, archive state, and timestamps. Categories are Identity, Education, Nursing, Employment, Residency, Financial, and Other. Statuses are Not started, Requested, Received, Translation needed, Complete, Expired, and Not applicable.
 
-Missing, expiring-soon, and expired states are derived rather than separately persisted. A past expiration date produces an effective Expired status even when the stored workflow status was Complete. `DocumentAttachmentMetadata` stores descriptive local placeholder information only and contains no file content or remote identifier.
+Missing, expiring-soon, and expired states are derived rather than separately persisted. A past expiration date produces an effective Expired status even when the stored workflow status was Complete. `DocumentAttachmentMetadata` stores descriptive metadata and the private relative path for a file copied into the app container; it contains no remote identifier.
 
-`ContactItem` remains a lightweight local fixture for the initial contacts screen.
+`ContactItem` records a named relocation contact with role, organization, email, optional phone, and notes. `WeeklyReviewEntry` records a week date plus progress, blockers, priorities, and notes. Both types have stable identifiers and are persisted by their feature stores.
+
+## Backup
+
+`RelocationBackup` is a versioned export envelope containing tasks, budget data, housing data, documents, contacts, weekly reviews, preferences, and attachment bytes. The backup is encoded as JSON and restored only after explicit confirmation.
 
 ## ApartmentListing and housing targets
 

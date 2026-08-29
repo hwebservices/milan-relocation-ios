@@ -17,10 +17,10 @@ struct TaskEditorView: View {
     @State private var notes: String
     @State private var showsDeleteConfirmation = false
 
-    init(task: RelocationTask?) {
+    init(task: RelocationTask?, defaultCategory: String = "General") {
         originalTask = task
         _title = State(initialValue: task?.title ?? "")
-        _category = State(initialValue: task?.category ?? "General")
+        _category = State(initialValue: task?.category ?? defaultCategory)
         _owner = State(initialValue: task?.owner ?? .both)
         _status = State(initialValue: task?.status ?? .notStarted)
         _priority = State(initialValue: task?.priority ?? .medium)

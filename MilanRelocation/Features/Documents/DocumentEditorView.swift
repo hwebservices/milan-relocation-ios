@@ -1,4 +1,6 @@
 import SwiftUI
+import UniformTypeIdentifiers
+import QuickLook
 
 struct DocumentEditorView: View {
     @Environment(DocumentStore.self) private var documentStore
@@ -18,8 +20,13 @@ struct DocumentEditorView: View {
     @State private var notes: String
     @State private var sourceInformation: String
     @State private var attachments: [DocumentAttachmentMetadata]
-    @State private var attachmentName = ""
     @State private var showsArchiveConfirmation = false
+    @State private var showsFileImporter = false
+    @State private var previewURL: URL?
+    @State private var importError: String?
+    @State private var newlyImportedPaths: Set<String> = []
+    @State private var pathsToRemoveOnSave: Set<String> = []
+    private let attachmentService = LocalAttachmentService()
 
     init(document: RelocationDocument?) {
         originalDocument = document
@@ -89,32 +96,26 @@ struct DocumentEditorView: View {
                 }
 
                 Section {
-                    HStack {
-                        TextField("Attachment file name", text: $attachmentName)
-                            .textInputAutocapitalization(.never)
-                            .accessibilityIdentifier("document-attachment-name")
-                        Button("Add") { addAttachment() }
-                            .disabled(trimmedAttachmentName.isEmpty)
-                            .accessibilityIdentifier("document-add-attachment")
-                    }
+                    Button { showsFileImporter = true } label: { Label("Import files", systemImage: "paperclip") }
+                        .accessibilityIdentifier("document-add-attachment")
                     ForEach(attachments) { attachment in
-                        Label {
+                        Button { previewURL = attachmentService.url(for: attachment.localRelativePath) } label: { Label {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(attachment.fileName)
-                                Text("Local metadata only")
+                                Text(attachment.byteCount.map { ByteCountFormatter.string(fromByteCount: Int64($0), countStyle: .file) } ?? "Local file")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
                         } icon: {
                             Image(systemName: "paperclip")
-                        }
+                        } }.buttonStyle(.plain).disabled(attachmentService.url(for: attachment.localRelativePath) == nil)
                         .accessibilityElement(children: .combine)
                     }
-                    .onDelete { attachments.remove(atOffsets: $0) }
+                    .onDelete(perform: removeAttachments)
                 } header: {
                     Text("Attachments")
                 } footer: {
-                    Text("This records placeholder metadata only. No document file is copied or uploaded.")
+                    Text("Files are copied into this app’s private local storage and are never uploaded.")
                 }
 
                 if let originalDocument {
@@ -139,7 +140,7 @@ struct DocumentEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") { cancel() }
                         .accessibilityIdentifier("document-cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -163,19 +164,15 @@ struct DocumentEditorView: View {
                 guard includesDate, includesExpirationDate, expirationDate < issueDate else { return }
                 expirationDate = issueDate
             }
+            .fileImporter(isPresented: $showsFileImporter, allowedContentTypes: [.data], allowsMultipleSelection: true) { result in importFiles(result) }
+            .quickLookPreview($previewURL)
+            .alert("File import failed", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) { Button("OK") { importError = nil } } message: { Text(importError ?? "The selected file could not be copied.") }
         }
         .preferredColorScheme(.light)
     }
 
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
-    private var trimmedAttachmentName: String { attachmentName.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var minimumExpirationDate: Date { includesIssueDate ? Calendar.current.startOfDay(for: issueDate) : .distantPast }
-
-    private func addAttachment() {
-        let contentType = trimmedAttachmentName.lowercased().hasSuffix(".pdf") ? "application/pdf" : "application/octet-stream"
-        attachments.append(DocumentAttachmentMetadata(fileName: trimmedAttachmentName, contentType: contentType))
-        attachmentName = ""
-    }
 
     private func save() {
         let cleanRequirement = requiredFor.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -195,6 +192,7 @@ struct DocumentEditorView: View {
         )
         if originalDocument == nil { documentStore.create(document) }
         else { documentStore.update(document) }
+        pathsToRemoveOnSave.forEach { attachmentService.remove(relativePath: $0) }
         dismiss()
     }
 
@@ -208,5 +206,29 @@ struct DocumentEditorView: View {
         guard let originalDocument else { return }
         documentStore.setArchived(false, id: originalDocument.id)
         dismiss()
+    }
+
+    private func cancel() { newlyImportedPaths.forEach { attachmentService.remove(relativePath: $0) }; dismiss() }
+    private func removeAttachments(at offsets: IndexSet) {
+        offsets.map { attachments[$0] }.forEach { stageRemoval(of: $0.localRelativePath) }
+        attachments.remove(atOffsets: offsets)
+    }
+    private func stageRemoval(of relativePath: String?) {
+        guard let relativePath else { return }
+        if newlyImportedPaths.remove(relativePath) != nil {
+            attachmentService.remove(relativePath: relativePath)
+        } else {
+            pathsToRemoveOnSave.insert(relativePath)
+        }
+    }
+    private func importFiles(_ result: Result<[URL], Error>) {
+        do {
+            for source in try result.get() {
+                let imported = try attachmentService.importFile(from: source)
+                let type = (try? source.resourceValues(forKeys: [.contentTypeKey]).contentType?.preferredMIMEType) ?? "application/octet-stream"
+                attachments.append(DocumentAttachmentMetadata(fileName: source.lastPathComponent, contentType: type, byteCount: imported.byteCount, localRelativePath: imported.relativePath))
+                newlyImportedPaths.insert(imported.relativePath)
+            }
+        } catch { importError = error.localizedDescription }
     }
 }

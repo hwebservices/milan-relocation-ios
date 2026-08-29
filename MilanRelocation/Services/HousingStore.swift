@@ -55,10 +55,12 @@ final class HousingStore {
 
     static func live() -> HousingStore {
         let persistence = FileHousingPersistence.live()
+        let isUITesting = ProcessInfo.processInfo.environment["MILAN_UI_TESTING"] == "1"
+        let seed = isUITesting ? sampleData : emptyData
         if ProcessInfo.processInfo.environment["MILAN_RESET_HOUSING"] == "1" {
-            try? persistence.save(sampleData)
+            try? persistence.save(seed)
         }
-        return HousingStore(persistence: persistence, seedData: sampleData)
+        return HousingStore(persistence: persistence, seedData: seed)
     }
 
     func create(_ listing: ApartmentListing) {
@@ -88,6 +90,8 @@ final class HousingStore {
         data.targets = targets
         save()
     }
+
+    func replaceAll(with data: HousingData) { self.data = data; normalizeAndSave() }
 
     func filteredListings(
         sort: HousingSort,
@@ -135,7 +139,7 @@ final class HousingStore {
             normalize()
             error = nil
         } catch {
-            self.error = "Housing data could not be loaded. Your sample shortlist is still available."
+            self.error = "Housing data could not be loaded. Please try again."
         }
     }
 
@@ -226,5 +230,10 @@ final class HousingStore {
             requiresElevator: true,
             furnishedPreference: .furnished
         )
+    )
+
+    static let emptyData = HousingData(
+        listings: [],
+        targets: MilanHousingTargets(maximumMonthlyCost: 0, maximumMoveInCash: 0, minimumBedrooms: 0, minimumSquareMeters: 0, requiresElevator: false, furnishedPreference: .unfurnished)
     )
 }
