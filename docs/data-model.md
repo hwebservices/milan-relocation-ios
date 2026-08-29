@@ -35,9 +35,13 @@ Ownership is intentionally small and explicit: Henry, Jeff, or Both. A later sha
 
 `RelocationFunding` separately tracks relocation cash, deposits, and the emergency reserve. `ReceiptAttachment` stores local placeholder metadata only; no file upload or external identifier is used.
 
-## DocumentItem and ContactItem
+## RelocationDocument
 
-Lightweight models support the initial document and contact screens. They are local fixtures and contain no uploaded files or external identifiers.
+`RelocationDocument` records a name, Henry/Jeff/Both ownership, a typed category and workflow status, optional issue and expiration dates, the requiring application or process, notes, source information, local attachment metadata, archive state, and timestamps. Categories are Identity, Education, Nursing, Employment, Residency, Financial, and Other. Statuses are Not started, Requested, Received, Translation needed, Complete, Expired, and Not applicable.
+
+Missing, expiring-soon, and expired states are derived rather than separately persisted. A past expiration date produces an effective Expired status even when the stored workflow status was Complete. `DocumentAttachmentMetadata` stores descriptive local placeholder information only and contains no file content or remote identifier.
+
+`ContactItem` remains a lightweight local fixture for the initial contacts screen.
 
 ## ApartmentListing and housing targets
 

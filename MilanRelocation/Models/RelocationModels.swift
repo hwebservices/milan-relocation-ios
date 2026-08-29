@@ -66,31 +66,6 @@ struct RelocationTask: Identifiable, Codable, Hashable {
     }
 }
 
-struct DocumentItem: Identifiable {
-    let id: UUID
-    let name: String
-    let category: String
-    let owner: TaskOwner
-    let isReady: Bool
-    let expirationDate: Date?
-
-    init(
-        id: UUID = UUID(),
-        name: String,
-        category: String,
-        owner: TaskOwner,
-        isReady: Bool,
-        expirationDate: Date? = nil
-    ) {
-        self.id = id
-        self.name = name
-        self.category = category
-        self.owner = owner
-        self.isReady = isReady
-        self.expirationDate = expirationDate
-    }
-}
-
 struct ContactItem: Identifiable {
     let id = UUID()
     let name: String

@@ -52,12 +52,14 @@ final class NotificationServiceTests: XCTestCase {
         listing.qualification = .rejected
         XCTAssertFalse(NotificationService.isHousingFollowUpReminderEligible(listing))
 
-        let currentDocument = DocumentItem(name: "Passport", category: "Identity", owner: .both, isReady: true, expirationDate: date(2027, 1, 1))
-        let expiredDocument = DocumentItem(name: "Old permit", category: "Identity", owner: .henry, isReady: true, expirationDate: date(2026, 8, 26))
-        let undatedDocument = DocumentItem(name: "Certificate", category: "Civil", owner: .both, isReady: false)
+        let currentDocument = RelocationDocument(name: "Passport", owner: .both, category: .identity, status: .complete, expirationDate: date(2027, 1, 1))
+        let expiredDocument = RelocationDocument(name: "Old permit", owner: .henry, category: .identity, status: .complete, expirationDate: date(2026, 8, 26))
+        let undatedDocument = RelocationDocument(name: "Certificate", owner: .both, category: .other, status: .requested)
+        let archivedDocument = RelocationDocument(name: "Archived passport", owner: .both, category: .identity, status: .complete, expirationDate: date(2027, 1, 1), isArchived: true)
         XCTAssertTrue(NotificationService.isDocumentExpirationReminderEligible(currentDocument, now: now, calendar: calendar))
         XCTAssertFalse(NotificationService.isDocumentExpirationReminderEligible(expiredDocument, now: now, calendar: calendar))
         XCTAssertFalse(NotificationService.isDocumentExpirationReminderEligible(undatedDocument, now: now, calendar: calendar))
+        XCTAssertFalse(NotificationService.isDocumentExpirationReminderEligible(archivedDocument, now: now, calendar: calendar))
     }
 
     func testDisabledCategoryRemovesItsRequests() {
@@ -92,6 +94,29 @@ final class NotificationServiceTests: XCTestCase {
         await service.rebuildScheduledNotifications(tasks: [item], housingListings: [], documents: [], now: now)
         XCTAssertFalse(center.requests.contains { $0.id.hasPrefix("milan.task.") })
         XCTAssertEqual(center.replacementCount, 3)
+    }
+
+    func testDocumentReminderReschedulesAndCancelsWhenArchived() async {
+        let center = RecordingNotificationCenter()
+        let service = NotificationService(center: center, persistence: MemoryNotificationPreferencesPersistence(), calendar: calendar)
+        let now = date(2026, 8, 27, hour: 8)
+        var document = RelocationDocument(
+            name: "Passport", owner: .henry, category: .identity, status: .complete,
+            expirationDate: date(2026, 9, 10)
+        )
+
+        await service.rebuildScheduledNotifications(tasks: [], housingListings: [], documents: [document], now: now)
+        let original = center.requests.first { $0.id.hasPrefix("milan.document.expiration.") }
+        XCTAssertNotNil(original)
+
+        document.expirationDate = date(2026, 10, 10)
+        await service.rebuildScheduledNotifications(tasks: [], housingListings: [], documents: [document], now: now)
+        let rescheduled = center.requests.first { $0.id.hasPrefix("milan.document.expiration.") }
+        XCTAssertNotEqual(original?.trigger, rescheduled?.trigger)
+
+        document.isArchived = true
+        await service.rebuildScheduledNotifications(tasks: [], housingListings: [], documents: [document], now: now)
+        XCTAssertFalse(center.requests.contains { $0.id.hasPrefix("milan.document.expiration.") })
     }
 
     private func makeService() -> NotificationService {
