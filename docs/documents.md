@@ -1,6 +1,6 @@
 # Document tracking
 
-The Documents area is a private, on-device checklist for records Henry and Jeff need during the Milan relocation. It does not upload or copy document files.
+The Documents area is a private, on-device checklist for records Henry and Jeff need during the Milan relocation. It copies selected files into the app's private container and never uploads them.
 
 ## Records
 
@@ -8,7 +8,7 @@ Each document stores a stable identifier, name, owner, category, workflow status
 
 Categories are Identity, Education, Nursing, Employment, Residency, Financial, and Other. Statuses are Not started, Requested, Received, Translation needed, Complete, Expired, and Not applicable.
 
-Attachment placeholders contain a file name, content type, optional byte count, and date added. They deliberately contain no file bytes, security-scoped bookmark, cloud URL, or external identifier.
+Attachments contain a file name, content type, optional byte count, date added, and private relative path. Files selected through the system importer are copied into Application Support, can be previewed with Quick Look, and are removed when the attachment or owning document is deleted. They deliberately contain no cloud URL or external identifier.
 
 ## Derived states
 
@@ -23,7 +23,7 @@ Date comparisons use calendar-day boundaries so time-of-day differences do not c
 
 `DocumentStore` owns create, edit, archive, filtering, derived collections, and JSON persistence. Production data is stored in Application Support as `MilanRelocation/documents.json`. UI tests use a separate resettable file.
 
-All document data remains local to the app sandbox. There is no backend, synchronization, authentication, analytics, or attachment upload.
+All document data and copied files remain local to the app sandbox. Settings can include them in an explicitly exported backup. There is no backend, synchronization, authentication, analytics, or attachment upload.
 
 ## Expiration reminders
 
@@ -33,4 +33,4 @@ Reminder permission and timing remain controlled in Settings → Notifications. 
 
 ## Testing
 
-`DocumentStoreTests` covers effective status, missing and expiration calculations, persistence, create/edit/archive behavior, filters, and attachment metadata. UI tests cover creating, editing, and filtering documents.
+`DocumentStoreTests` covers effective status, missing and expiration calculations, persistence, create/edit/archive behavior, filters, and attachment metadata. `LocalAttachmentServiceTests` covers import, lookup, backup data, restore, and removal. UI tests cover creating, editing, and filtering documents.

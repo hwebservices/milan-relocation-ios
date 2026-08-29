@@ -30,6 +30,7 @@ struct DocumentAttachmentMetadata: Identifiable, Codable, Hashable {
     var fileName: String
     var contentType: String
     var byteCount: Int?
+    var localRelativePath: String?
     var addedAt: Date
 
     init(
@@ -37,13 +38,15 @@ struct DocumentAttachmentMetadata: Identifiable, Codable, Hashable {
         fileName: String,
         contentType: String = "application/octet-stream",
         byteCount: Int? = nil,
-        addedAt: Date = .now
+        addedAt: Date = .now,
+        localRelativePath: String? = nil
     ) {
         self.id = id
         self.fileName = fileName
         self.contentType = contentType
         self.byteCount = byteCount
         self.addedAt = addedAt
+        self.localRelativePath = localRelativePath
     }
 }
 

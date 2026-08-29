@@ -10,9 +10,11 @@ struct TasksView: View {
     @State private var statusFilter: TaskStatus?
     @State private var ownerFilter: TaskOwner?
     @State private var editorContext: TaskEditorContext?
+    @AppStorage("showCompletedTasks") private var showCompleted = true
 
     private var filteredTasks: [RelocationTask] {
         taskStore.filtered(status: statusFilter, owner: ownerFilter)
+            .filter { showCompleted || $0.status != .complete }
     }
 
     var body: some View {

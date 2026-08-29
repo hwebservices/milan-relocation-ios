@@ -66,10 +66,30 @@ struct RelocationTask: Identifiable, Codable, Hashable {
     }
 }
 
-struct ContactItem: Identifiable {
-    let id = UUID()
-    let name: String
-    let role: String
-    let organization: String
-    let email: String
+struct ContactItem: Identifiable, Codable, Hashable {
+    let id: UUID
+    var name: String
+    var role: String
+    var organization: String
+    var email: String
+    var phone: String?
+    var notes: String?
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        role: String,
+        organization: String,
+        email: String,
+        phone: String? = nil,
+        notes: String? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.role = role
+        self.organization = organization
+        self.email = email
+        self.phone = phone
+        self.notes = notes
+    }
 }

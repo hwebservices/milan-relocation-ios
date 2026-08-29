@@ -67,9 +67,12 @@ final class BudgetStore {
         if environment["MILAN_RESET_BUDGET"] == "1" {
             try? FileManager.default.removeItem(at: persistence.url)
         }
+        let seed = environment["MILAN_UI_TESTING"] == "1"
+            ? sampleData(calendar: calendar, now: now)
+            : BudgetData(expenses: [], targets: [], funding: RelocationFunding(relocationCash: 0, deposits: 0, emergencyReserve: 0))
         return BudgetStore(
             persistence: persistence,
-            seedData: sampleData(calendar: calendar, now: now),
+            seedData: seed,
             calendar: calendar
         )
     }
@@ -104,6 +107,8 @@ final class BudgetStore {
         data.funding = funding
         commit()
     }
+
+    func replaceAll(with data: BudgetData) { self.data = data; normalizeTargets(); commit() }
 
     func expenses(in month: Date) -> [Expense] {
         guard let monthInterval = calendar.dateInterval(of: .month, for: month) else { return [] }
@@ -177,7 +182,7 @@ final class BudgetStore {
                 Expense(name: "Porta Romana temporary rent", amount: 2850, date: month(-1, day: 1), category: .rent, owner: .both, recurrence: .monthly, notes: "Includes furnished apartment service fee."),
                 Expense(name: "Jeff health coverage", amount: 420, date: month(-2, day: 3), category: .jeffHealthInsurance, owner: .jeff, recurrence: .monthly),
                 Expense(name: "Fiber internet", amount: 39.99, date: month(-1, day: 8), category: .internet, owner: .henry, recurrence: .monthly),
-                Expense(name: "Groceries — Esselunga", amount: 164.35, date: day(6), category: .groceries, owner: .jeff, recurrence: .oneTime, receipts: [ReceiptAttachment(displayName: "Esselunga receipt.pdf")]),
+                Expense(name: "Groceries — Esselunga", amount: 164.35, date: day(6), category: .groceries, owner: .jeff, recurrence: .oneTime),
                 Expense(name: "ATM transit passes", amount: 78, date: day(4), category: .transport, owner: .both, recurrence: .oneTime)
             ],
             targets: targets.map { MonthlyBudgetTarget(category: $0.0, amount: $0.1) },

@@ -1,6 +1,8 @@
 # Milan Relocation
 
-A private, native SwiftUI workspace for Henry and Jeff to coordinate their move to Milan. Tasks, expenses, budget targets, relocation funds, apartment listings, housing targets, documents, contacts, and follow-ups are editable and stored locally between launches. Optional reminders use Apple's on-device local notifications; there is no backend, push provider, authentication, analytics, or external dependency.
+A private, native SwiftUI workspace for Henry and Jeff to coordinate their move to Milan. Tasks, expenses, budget targets, relocation funds, apartment listings, housing targets, documents, contacts, weekly reviews, and follow-ups are editable and stored locally between launches. Receipts and document files are copied into the app's private container, and Settings can export or restore a complete JSON backup including those files. Optional reminders use Apple's on-device local notifications; there is no backend, push provider, authentication, analytics, or external dependency.
+
+A production install starts with an empty workspace so every displayed value comes from saved user data. Deterministic fixture data is enabled only by the UI-test launch environment.
 
 ## Requirements
 

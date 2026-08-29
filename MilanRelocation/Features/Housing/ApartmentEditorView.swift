@@ -65,6 +65,10 @@ struct ApartmentEditorView: View {
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .accessibilityIdentifier("housing-listing-url")
+                    if let url = validatedListingURL {
+                        Link(destination: url) { Label("Open listing", systemImage: "safari") }
+                            .accessibilityIdentifier("housing-open-listing")
+                    }
                     DatePicker("Available", selection: $availabilityDate, displayedComponents: .date)
                         .accessibilityIdentifier("housing-availability")
                 }
@@ -221,6 +225,11 @@ struct ApartmentEditorView: View {
 
     private var totalMonthlyCost: Decimal { decimal(rent) + decimal(condominio) + decimal(utilities) }
     private var requiredMoveInCash: Decimal { decimal(deposit) + decimal(agencyFee) + totalMonthlyCost + decimal(otherCosts) }
+    private var validatedListingURL: URL? {
+        let value = listingURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: value), let scheme = url.scheme?.lowercased(), ["http", "https"].contains(scheme), url.host != nil else { return nil }
+        return url
+    }
 
     private var draftListing: ApartmentListing {
         ApartmentListing(

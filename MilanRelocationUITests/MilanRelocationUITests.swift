@@ -271,6 +271,47 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertFalse(complete.exists)
     }
 
+    func testCreatesAndEditsContact() {
+        continueAfterFailure = false
+        let app = makeApp(); app.launch(); navigateToContacts(in: app)
+        app.buttons["contacts-add-contact"].tap()
+        XCTAssertTrue(app.navigationBars["New Contact"].waitForExistence(timeout: 2))
+        app.textFields["contact-name"].tap(); app.textFields["contact-name"].typeText("Paolo Verdi")
+        app.textFields["contact-role"].tap(); app.textFields["contact-role"].typeText("Accountant")
+        app.textFields["contact-email"].tap(); app.textFields["contact-email"].typeText("paolo@example.com")
+        app.buttons["contact-save"].tap()
+        let created = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Paolo Verdi")).firstMatch
+        XCTAssertTrue(created.waitForExistence(timeout: 3)); created.tap()
+        XCTAssertTrue(app.navigationBars["Edit Contact"].waitForExistence(timeout: 2))
+        let organization = app.textFields["contact-organization"]; organization.tap(); organization.typeText("Studio Verdi")
+        app.buttons["contact-save"].tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Studio Verdi")).firstMatch.waitForExistence(timeout: 3))
+    }
+
+    func testSavesAndEditsWeeklyReview() {
+        continueAfterFailure = false
+        let app = makeApp(); app.launch(); navigateToWeeklyReview(in: app)
+        app.buttons["review-add"].tap()
+        XCTAssertTrue(app.navigationBars["New Review"].waitForExistence(timeout: 2))
+        app.textViews["review-progress"].tap(); app.textViews["review-progress"].typeText("Submitted residency packet")
+        app.textViews["review-priorities"].tap(); app.textViews["review-priorities"].typeText("Choose apartment")
+        app.buttons["review-save"].tap()
+        let row = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Submitted residency packet")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 3)); row.tap()
+        XCTAssertTrue(app.navigationBars["Edit Review"].waitForExistence(timeout: 2))
+    }
+
+    func testShowCompletedSettingControlsTaskList() {
+        continueAfterFailure = false
+        let app = makeApp(); app.launch(); navigateToSettings(in: app)
+        let toggle = app.switches["settings-show-completed"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 2)); toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        openSidebar(from: app.navigationBars["Settings"])
+        app.staticTexts["nav-tasks"].tap()
+        XCTAssertTrue(app.navigationBars["Tasks"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Create first-month arrival budget")).firstMatch.exists)
+    }
+
     func testNotificationSettingsRequestsPermissionAndUpdatesPreferences() {
         continueAfterFailure = false
         let app = makeApp()
@@ -318,6 +359,9 @@ final class MilanRelocationUITests: XCTestCase {
         app.launchEnvironment["MILAN_RESET_HOUSING"] = "1"
         app.launchEnvironment["MILAN_RESET_DOCUMENTS"] = "1"
         app.launchEnvironment["MILAN_RESET_NOTIFICATIONS"] = "1"
+        app.launchEnvironment["MILAN_RESET_CONTACTS"] = "1"
+        app.launchEnvironment["MILAN_RESET_WEEKLY_REVIEWS"] = "1"
+        app.launchEnvironment["MILAN_RESET_SETTINGS"] = "1"
         return app
     }
 
@@ -373,6 +417,18 @@ final class MilanRelocationUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 2))
         row.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 2))
+    }
+
+    private func navigateToContacts(in app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5)); openSidebar(from: app.navigationBars["Today"])
+        let row = app.staticTexts["nav-contacts"]; XCTAssertTrue(row.waitForExistence(timeout: 2)); row.tap()
+        XCTAssertTrue(app.navigationBars["Contacts"].waitForExistence(timeout: 2))
+    }
+
+    private func navigateToWeeklyReview(in app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5)); openSidebar(from: app.navigationBars["Today"])
+        let row = app.staticTexts["nav-weeklyReview"]; XCTAssertTrue(row.waitForExistence(timeout: 2)); row.tap()
+        XCTAssertTrue(app.navigationBars["Weekly Review"].waitForExistence(timeout: 2))
     }
 
     private func openSidebar(from navigationBar: XCUIElement) {

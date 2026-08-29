@@ -59,9 +59,9 @@ final class DocumentStore {
         now: Date = .now
     ) -> DocumentStore {
         let persistence = FileDocumentPersistence.live(environment: environment)
-        let samples = sampleDocuments(calendar: calendar, now: now)
-        if environment["MILAN_RESET_DOCUMENTS"] == "1" { try? persistence.save(samples) }
-        return DocumentStore(persistence: persistence, seedDocuments: samples, calendar: calendar)
+        let seed = environment["MILAN_UI_TESTING"] == "1" ? sampleDocuments(calendar: calendar, now: now) : []
+        if environment["MILAN_RESET_DOCUMENTS"] == "1" { try? persistence.save(seed) }
+        return DocumentStore(persistence: persistence, seedDocuments: seed, calendar: calendar)
     }
 
     func create(_ document: RelocationDocument) {
@@ -83,6 +83,8 @@ final class DocumentStore {
         documents[index].updatedAt = now
         commit()
     }
+
+    func replaceAll(with documents: [RelocationDocument]) { self.documents = documents; commit() }
 
     func filtered(
         owner: TaskOwner?,
@@ -125,7 +127,7 @@ final class DocumentStore {
             sortDocuments()
             error = nil
         } catch {
-            self.error = "Documents could not be loaded. The local sample checklist is still available."
+            self.error = "Documents could not be loaded. Please try again."
         }
     }
 
@@ -155,8 +157,7 @@ final class DocumentStore {
             RelocationDocument(
                 name: "Henry passport", owner: .henry, category: .identity, status: .complete,
                 issueDate: day(-900), expirationDate: day(760), requiredFor: "Elective residence visa",
-                sourceInformation: "U.S. Department of State",
-                attachments: [DocumentAttachmentMetadata(fileName: "henry-passport-scan.pdf", contentType: "application/pdf")]
+                sourceInformation: "U.S. Department of State"
             ),
             RelocationDocument(
                 name: "Jeff nursing diploma", owner: .jeff, category: .nursing, status: .translationNeeded,
