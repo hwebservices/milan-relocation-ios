@@ -12,7 +12,7 @@ The foundation favors clear feature ownership, SwiftUI composition, and an easy 
 - **Navigation** defines destinations and the adaptive app shell.
 - **Models** contains domain models with no UI dependencies beyond presentation labels.
 - **Features** contains one folder per primary app area. Each feature owns its screen and may later own view models and feature-specific components.
-- **Services** provides protocols and local implementations. `TaskStore`, `BudgetStore`, and `HousingStore` own editable state and JSON persistence; `MockRelocationStore` supplies the remaining foundation fixtures.
+- **Services** provides protocols and local implementations. `TaskStore`, `BudgetStore`, and `HousingStore` own editable state and JSON persistence; `NotificationService` owns local reminder permission, eligibility, and scheduling; `MockRelocationStore` supplies the remaining foundation fixtures.
 - **Resources** contains the asset catalog.
 
 ## State and data flow
@@ -22,6 +22,8 @@ The foundation favors clear feature ownership, SwiftUI composition, and an easy 
 `BudgetStore` treats one-time expenses as belonging to their recorded month and monthly expenses as active from their recorded month forward. Monthly summaries, category actuals, remaining budget, and variance are derived rather than persisted.
 
 `HousingStore` persists the apartment shortlist and editable Milan targets. Monthly cost, move-in cash, target qualification, and overdue follow-ups are derived. Rent edits append immutable price-change entries, preserving the listing's local history without duplicating current price state.
+
+`NotificationService` is the only layer that imports `UserNotifications`. `AppShellView` observes relevant data signatures and asks the service to rebuild when tasks, housing follow-ups, document expirations, permission, or preferences change. Rebuilding replaces pending app requests so stale reminders are cancelled deterministically.
 
 The timeline is a projection of `TaskStore` rather than a separate data source. `GanttTimelineLayout` owns date-range, duration, zoom-scale, milestone, and positioning calculations independently from SwiftUI, keeping the chart deterministic and unit-testable.
 
