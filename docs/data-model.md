@@ -38,3 +38,11 @@ Ownership is intentionally small and explicit: Henry, Jeff, or Both. A later sha
 ## DocumentItem and ContactItem
 
 Lightweight models support the initial document and contact screens. They are local fixtures and contain no uploaded files or external identifiers.
+
+## ApartmentListing and housing targets
+
+`ApartmentListing` records address and neighborhood, source URL, rent, condominio, estimated utilities, home attributes, contract and availability details, move-in costs, qualification, contact history, next follow-up, price history, and notes. Total monthly cost is rent plus condominio and utilities. Required move-in cash adds deposit, agency fee, the first total month, and other costs.
+
+`MilanHousingTargets` stores editable monthly and move-in ceilings plus minimum bedrooms, minimum square meters, elevator requirement, and optional furnishing preference. A listing's budget and requirements results are calculated against these targets; its explicit pipeline qualification remains a separate decision flag.
+
+`HousingContactAttempt` preserves outreach method, date, and optional response. `HousingPriceChange` is appended automatically whenever rent changes. Follow-up overdue state is calculated from the next follow-up date and excludes rejected listings.
